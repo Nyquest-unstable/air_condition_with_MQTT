@@ -7,7 +7,33 @@
 			"problemMatcher": [
 				"$platformio"
 			],
-			"label": "PlatformIO: Upload"
-		}
+			"label": "PlatformIO: Upload",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "PlatformIO",
+			"task": "Build (seeed_wio_terminal)",
+			"problemMatcher": [
+				"$platformio"
+			],
+			"label": "PlatformIO: Build (seeed_wio_terminal)"
+		},
+        {
+            "label": "compiledb",
+            "type": "shell",
+            "command": ".\\myenv\\Scripts\\activate ;pio run -t compiledb",
+            "problemMatcher": [],
+            "detail": "pio 配合 clangd",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "PlatformIO: Build (seeed_wio_terminal)"
+            ]
+        }
 	]
 }

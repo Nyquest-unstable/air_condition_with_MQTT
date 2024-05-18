@@ -82,7 +82,7 @@ void loop() {
   static int cnt = 0;
   if (digitalRead(WIO_KEY_A) == LOW) {
     tft.print(cnt);
-    tft.println("A Key pressed and open the air condition ");
+    tft.println("A Key pressed: Open the air condition ");
     cnt ++;
   }
   else if (digitalRead(WIO_KEY_B) == LOW) {
@@ -92,7 +92,7 @@ void loop() {
   }
   else if (digitalRead(WIO_KEY_C) == LOW) {
     tft.print(cnt);
-    tft.println("C Key pressed and close the air condition ");
+    tft.println("C Key pressed: Close the air condition ");
     cnt ++;
   }
   if(cnt > 11){
