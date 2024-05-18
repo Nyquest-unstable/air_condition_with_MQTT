@@ -1,0 +1,7 @@
+{
+    "cmake.sourceDirectory": "E:/MY/WIO_Terminal_air_condition/wio_terimianl_air_condition/.pio/libdeps/seeed_wio_terminal/Unity",
+    "clangd.arguments": [
+		// ...
+        "--compile-commands-dir=/path/to/youConfigFileDir"
+    ]
+}
