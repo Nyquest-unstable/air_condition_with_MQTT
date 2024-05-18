@@ -1,7 +1,7 @@
 #include "get_code.h"
 
 
-void getcode(unsigned char A,unsigned char B,unsigned char C, unsigned int *buf){
+void getcode(unsigned char A,unsigned char B,unsigned char C, uint16_t *buf){
   unsigned char mask=0x80;
   unsigned int cnt=2;
   buf[0]=4400;

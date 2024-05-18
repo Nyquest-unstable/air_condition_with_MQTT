@@ -28,6 +28,6 @@ const uint16_t buf_close[]={4400,4400,
                            550,1660,550,1660,550,1660,550,1660,550,1660,550,1660,550,1660,550,1660,
                            550,8000};
 
-void getcode(unsigned char A,unsigned char B,unsigned char C,unsigned int *buf);
+void getcode(unsigned char A,unsigned char B,unsigned char C, uint16_t *buf);
 
 #endif
