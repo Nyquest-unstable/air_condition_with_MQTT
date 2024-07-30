@@ -3,6 +3,7 @@
 #include <IRremote.h>
 #include <cstdint>
 #include "TFT_eSPI.h"
+#include "USB/USBAPI.h"
 #include "variant.h"
 
 // #include ""
@@ -36,29 +37,44 @@ uint8_t C_temp_part = 0x00; /*C码温度部分*/
 uint8_t C_mode_part = 0x00; /*C码模式部分*/
 uint8_t c_temp_cal = 0xD0;
 
-uint16_t buf[]={4400,4400,
-                           550,1660,550,550,550,1660,550,1660,550,550,550,550,550,1660,550,550,
-                           550,550,550,1660,550,550,550,550,550,1660,550,1660,550,550,550,1660,
-                           550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,550,1660,
-                           550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,550,550,
-                           550,1660,550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,
-                           550,550,550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,
-                           550,5220,
-                           4400,4400,
-                           550,1660,550,550,550,1660,550,1660,550,550,550,550,550,1660,550,550,
-                           550,550,550,1660,550,550,550,550,550,1660,550,1660,550,550,550,1660,
-                           550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,550,1660,
-                           550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,550,550,
-                           550,1660,550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,
-                           550,550,550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,
-                           550,8000};
+uint16_t buf_TEMP[]={
+  4400,4400,
+  550,1660,550,550,550,1660,550,1660,550,550,550,550,550,1660,550,550,
+  550,550,550,1660,550,550,550,550,550,1660,550,1660,550,550,550,1660,
+  550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,550,1660,
+  550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,550,550,
+  550,1660,550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,
+  550,550,550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,
+  550,5220,
+  4400,4400,
+  550,1660,550,550,550,1660,550,1660,550,550,550,550,550,1660,550,550,
+  550,550,550,1660,550,550,550,550,550,1660,550,1660,550,550,550,1660,
+  550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,550,1660,
+  550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,550,550,
+  550,1660,550,1660,550,550,550,1660,550,550,550,550,550,550,550,550,
+  550,550,550,550,550,1660,550,550,550,1660,550,1660,550,1660,550,1660,
+  550,8000
+};
+
+/*创建一个温度对应表*/
+char temperature_table[] = {
+  0b0000, 0b0001, 0b0011, 0b0010, 
+  0b0110, 0b0111, 0b0101, 0b0100, 
+  0b1100, 0b1101, 0b1001, 0b1000,
+  0b1010, 0b1011, 0b1110
+};
+
+uint16_t checkbuff[] = {4400, 4400, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 550, 550, 
+1660, 550, 550, 550, 550, 550, 550, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 1660, 550, 1660, 550, 5220, 4400, 4400, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 550, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 1660, 550, 1660, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 550, 1660, 550, 550, 550, 550, 550, 1660, 550, 1660, 550, 1660, 550, 8000};
+
+uint16_t buf[200]={0};
 
 IRsend mySender;
 
 uint8_t tempreture_increas(int temp_offset, int mode){
   uint8_t final_c;
 
-  C_temp_part += temp_offset;
+  C_temp_part = temperature_table[temp_offset];
   if(mode == 0){ /*制热模式*/
     C_mode_part = 0x03;
     }
@@ -104,28 +120,48 @@ void setup() {
 }
 
  
+void print_array(uint16_t *arr, int size)
+{
+  for (int i = 0; i < size; ++i) {
+    Serial.print(arr[i]); // 打印数组中的每个元素
+    if (i < size - 1) { // 如果不是最后一个元素，打印一个分隔符
+      Serial.print(", ");
+    }
+  }
+  Serial.println(); // 打印换行符
+}
+
+
+
 void sendMeidi_OPEN(unsigned char A,unsigned char B,unsigned char C){
-  getcode(A, B, C, buf); 
+  int cnt_temp = 0;
+  cnt_temp = getcode(A, B, C, buf); 
+  Serial.println(sizeof(buf) / sizeof(buf[0]));
+  print_array(buf, sizeof(buf) / sizeof(buf[0]));
+  delay(10);
   mySender.sendRaw(buf,200,38);
 }
+
+
 
 void loop() {
   
   // put your main code here, to run repeatedly:
-  static int cnt = 0;
-  static int air_cnt = air_cnt;
+  static int cnt = 0; /*显示的行数，不能超过11行*/
+  static int air_cnt = 28-17;/*空调温度计数*/
   static int air_mode = 1;
   if (digitalRead(WIO_KEY_A) == LOW) {
     tft.print(cnt);
     tft.println("A Key pressed: Open the air condition ");
-    sendMeidi_OPEN(0xB2,0xAF,c_temp_cal);  
+    sendMeidi_OPEN(0xB2,0xBF,c_temp_cal);  
     cnt ++;
   }
   else if (digitalRead(WIO_KEY_B) == LOW) {
     tft.print(cnt);
     air_mode = !air_mode;
     tft.print("B Key pressed Mode: ");
-    tft.println(air_mode);
+    tft.print(air_mode);
+    tft.println(air_mode?"cold":"hot");
     cnt ++;
   }
   else if (digitalRead(WIO_KEY_C) == LOW) {
@@ -154,6 +190,7 @@ void loop() {
     tft.setCursor(tft.getCursorX(), 0);
     cnt = 0;
   }
+  /*确保温度不会超过设定范围*/
   if (air_cnt > 13){
     air_cnt = 13;
   }
@@ -162,20 +199,4 @@ void loop() {
   }
   c_temp_cal = tempreture_increas(air_cnt, air_mode);
   delay(200);
-  // if (Serial.read() != -1) {
-  // //   send a code every time a character is received from the 
-  // //   serial port. You could modify this sketch to send when you
-  // //   push a button connected to an digital input pin.
-  // //   Substitute values and protocols in the following statement
-  // //   for device you have available.
-  // //  mySender.send(SONY,0xa8bca, 20);//Sony DVD power A8BCA, 20 bits
-  //   // mySender.send(NEC,0x61a0f00f,0);//NEC TV power button=0x61a0f00f
-  //   mySender.sendRaw(buf, 200, 38);
-  //   Serial.println(F("Sent signal."));
-  // }
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  // return x + y;
 }
